@@ -1,0 +1,1207 @@
+<html ng-app="starkAPP">
+<head>
+    <title>复旦二手工坊 - 复旦人自己的二手市场</title>
+    <meta name="keywords" content="复旦,复旦大学,复旦二手工坊,校园,大学,大学生,二手,闲置,二手市场,跳蚤市场,旧货市场,二手网,二手交易,校园二手,校园二手市场,校园二手网,校园跳蚤市场,大学生二手,大学生二手市场,大学生二手网,大学生跳蚤市场"/>
+    <meta name="description" content="复旦人自己的二手交易平台！涵盖闲置数码、校园代步、电器日用、图书教材、美妆衣物、运动棋牌、票券小物。满足复旦学生校园内的二手交易的需求。学号认证更安全，校内交易更方便。"/>
+    <link rel="icon" href="img/favicon.ico" mce_href="img/favicon.ico" type="image/x-icon"/>
+    <meta name="baidu-site-verification" content="K56YyEWnT7"/>
+    <link rel="stylesheet" href="css/index.css"/>
+    <script type="text/javascript" src="js/jquery.js"></script>
+    <script type="text/javascript" src="js/index.bundle.js"></script>
+    <script type="text/javascript" src="js/materialize.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('.slider').slider({
+                full_width: true
+            });
+        });
+    </script>
+    <link rel="stylesheet" href="css/materialize-icon.css"/>
+</head>
+<body ng-view="ng-view" ng-cloak="ng-cloak">
+<div ng-controller="headerController" class="header stark-components navbar-fixed">
+    <nav class="white nav1">
+        <div class="nav-wrapper">
+            <a href="/" class="logo">
+                <em class="em1">北航</em>
+                <em class="em2">二手工坊</em>
+                <em class="em3">beihang.market</em>
+            </a>
+            <div class="nav-wrapper search-bar">
+                <form ng-submit="search()">
+                    <div class="input-field">
+                        <input id="search" type="search" ng-model="keyword" placeholder="搜点什么吧233..." required="required"/>
+                        <label for="search">
+                            <i ng-click="search()" class="iconfont">&#xe607;</i>
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <ul class="right">
+                <li class="publish-btn">
+                    <button ng-click="showVerifyMail()" data-position="bottom" data-delay="50" data-tooltip="需要先验证邮箱哦！" class="red lighten-1 waves-effect waves-light btn">我要发布</button>
+                </li>
+                <li>
+                    <a href="/usermanage/">我发布的商品</a>
+                </li>
+                <li>
+                    <a>frankzhou</a>
+                </li>
+                <li class="notification">
+                    <i ng-click="showNotificationBox()" class="iconfont">&#xe60a;</i>
+                    <div ng-show="notification.tagIsShow" class="notification-amount red lighten-1">{{notification.amount}} </div>
+                    <div ng-show="notification.boxIsShow" class="notification-box z-depth-1">
+                        <ul class="new">
+                            <li ng-repeat="item in notification.newNotification">
+                                <a ng-href="/item/{{item.itemID}}">{{item.content}}</a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                <li>
+                    <a ng-click="changeMoreVertShow()">
+                        <i class="iconfont">&#xe615;</i>
+                    </a>
+                    <div class="more-vert">
+                        <ul ng-show="moreVertIsShow" class="dropdown-content">
+                            <li>
+                                <a ng-click="showVerifyMail()">学邮验证</a>
+                            </li>
+                            <li>
+                                <a ng-click="showChangeName()">更改用户名</a>
+                            </li>
+                            <li>
+                                <a ng-click="logout()">退出登录</a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+</div>
+<div ng-controller="publishController">
+    <div id="change-show" ng-show="publishIsShow" ng-click="changePublishShow($event)" class="publish stark-components">
+        <div class="publish-box z-depth-4">
+            <div class="row">
+                <div ng-show="publishLoaderIsShow" class="col s12 loader">
+                    <p class="text">已上传{{complete}}张图片，共{{total}}张...</p>
+                    <div class="preloader-wrapper big active">
+                        <div class="spinner-layer spinner-red-only">
+                            <div class="circle-clipper left">
+                                <div class="circle"></div>
+                            </div>
+                            <div class="gap-patch">
+                                <div class="circle"></div>
+                            </div>
+                            <div class="circle-clipper right">
+                                <div class="circle"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <p ng-click="cancel()" class="cancel">取消 </p>
+                </div>
+                <div class="col s12 title">
+                    <h1>发布商品</h1>
+                </div>
+                <div class="input-field col s12">
+                    <input id="item-name" type="text" ng-model="item.name" required="required" class="validate"/>
+                    <label for="item-name">商品名称（必填）</label>
+                </div>
+                <div class="input-field col s12">
+                    <textarea id="item-detail" ng-model="item.detail" required="required" class="materialize-textarea"></textarea>
+                    <label for="item-detail">商品详情（必填）</label>
+                </div>
+                <div class="input-field col s6">
+                    <select ng-model="item.location" class="browser-default">
+                        <option value="" disabled="disabled" selected="selected">交易地点</option>
+                        <option value="全校">全校</option>
+                        <option value="邯郸校区">邯郸校区</option>
+                        <option value="江湾校区">江湾校区</option>
+                        <option value="枫林校区">枫林校区</option>
+                        <option value="张江校区">张江校区</option>
+                    </select>
+                </div>
+                <div class="input-field col s6">
+                    <input id="item-price" type="text" ng-model="item.price" required="required" class="validate"/>
+                    <label for="item-price">商品价格（必填）（元）</label>
+                </div>
+                <div class="input-field col s6">
+                    <select ng-model="item.category" required="required" class="browser-default">
+                        <option value="" disabled="disabled" selected="selected">商品类型（必填）</option>
+                        <option value="闲置数码">闲置数码</option>
+                        <option value="校园代步">校园代步</option>
+                        <option value="电器日用">电器日用</option>
+                        <option value="图书教材">图书教材</option>
+                        <option value="美妆衣物">美妆衣物</option>
+                        <option value="运动棋牌">运动棋牌</option>
+                        <option value="票券小物">票券小物</option>
+                    </select>
+                </div>
+                <div class="switch col s6">
+                    <label>
+                        <em>可讲价</em>
+                        <input type="checkbox" ng-model="item.noBargain"/>
+                        <span class="lever"></span>
+                        <em>不可讲价</em>
+                    </label>
+                </div>
+                <p class="contact">联系方式（除邮箱外必填一项）</p>
+                <div class="input-field col s6">
+                    <input id="item-contact-phone" type="text" ng-model="item.tel" required="required" pattern="[0-9]{11}" class="validate"/>
+                    <label for="item-contact-phone">手机</label>
+                </div>
+                <div class="email input-field col s6">
+                    <h1>邮箱</h1>
+                    <p></p>
+                </div>
+                <div class="input-field col s6">
+                    <input id="item-contact-qq" type="text" ng-model="item.qq" class="validate"/>
+                    <label for="item-contact-qq">QQ</label>
+                </div>
+                <div class="input-field col s6">
+                    <input id="item-contact-wechat" type="text" ng-model="item.wechat" class="validate"/>
+                    <label for="item-contact-wechat">微信号</label>
+                </div>
+                <div ng-repeat="img in imgs track by $index" class="file-field input-field col s12">
+                    <div class="btn base-blue waves-effect waves-light">
+                        <span>商品图片</span>
+                        <input type="file" accept="image/*" class="upload-img"/>
+                    </div>
+                    <div class="file-path-wrapper">
+                        <input type="text" placeholder="这里上传你的商品图片" class="file-path validate"/>
+                    </div>
+                </div>
+                <button ng-click="addImg()" class="btn-floating btn-small waves-effect waves-light add">
+                    <i class="iconfont">&#xe60c;</i>
+                </button>
+                <button ng-show="imgs.length&gt;1" ng-click="deleteImg()" class="btn-floating btn-small waves-effect waves-light delete">
+                    <i class="iconfont">&#xe610;</i>
+                </button>
+                <button ng-click="publish()" class="waves-effect waves-light btn-large publish-btn red lighten-1">
+                    <i class="iconfont left">&#xe611;</i>
+                    <em>马上发布</em>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div ng-controller="alertController">
+    <div ng-show="alertIsShow" class="alert stark-components">
+        <div class="publish-box z-depth-4">
+            <div class="row">
+                <div class="col s12 title red lighten-1">
+                    <h1>提示</h1>
+                </div>
+                <div class="content col s12">{{text}}</div>
+                <div class="col s12">
+                    <a ng-click="close()" class="waves-effect btn-flat close">关闭</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div ng-show="noticeIsShow" class="notice stark-components">
+        <div class="publish-box z-depth-4">
+            <div class="row">
+                <div class="col s12 logo"></div>
+                <div class="content col s12">{{text}}</div>
+                <div class="link col s12">
+                    <a target="_blank" ng-hide="showVerifyMail" href="{{link}}">{{linkText}}</a>
+                    <a ng-click="showVerify()" ng-show="showVerifyMail">{{linkText}}</a>
+                </div>
+                <div class="col s12 close-wrapper">
+                    <a ng-click="close()" class="waves-effect btn-flat close">关闭</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div ng-controller="loginController">
+    <div id="change-show" ng-show="loginIsShow" ng-click="changeLoginShow($event)" class="login stark-components">
+        <div class="publish-box z-depth-4">
+            <div class="row">
+                <div class="col s12 title"></div>
+                <div class="input-field col s12">
+                    <input type="text" ng-model="user.username" required="required" class="validate"/>
+                    <label for="item-name">手机</label>
+                </div>
+                <div class="input-field col s12">
+                    <input type="password" ng-model="user.password" ng-keyup="checkEnter($event)" required="required" class="validate"/>
+                    <label for="item-detail">密码</label>
+                    <a ng-click="showForget()" class="forget-btn">忘记密码？</a>
+                </div>
+                <button ng-click="login()" class="waves-effect waves-light btn login-btn red lighten-1">
+                    <i class="iconfont left">&#xe614;</i>
+                    <em>登录</em>
+                </button>
+                <div class="col s12 signup-area">
+                    <em>没有账号？赶快</em>
+                    <a ng-click="showSignup()" class="signup-btn">注册</a>
+                    <em>吧！</em>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div ng-controller="signupController">
+    <div id="change-show" ng-show="signupIsShow" ng-click="changeSignupShow($event)" class="signup stark-components">
+        <div class="publish-box z-depth-4">
+            <div class="row">
+                <div class="col s12 title"></div>
+                <div class="input-field col s12">
+                    <input type="text" ng-model="signupInfo.tel" required="required" pattern="^1[0-9]{10}$" class="validate"/>
+                    <label>手机</label>
+                </div>
+                <div ng-show="checkTelIsShow" class="col s12">
+                    <button ng-click="checkTel()" class="waves-effect waves-light btn verify-btn red lighten-1">
+                        <i class="iconfont left">&#xe60d;</i>
+                        <em>验证手机</em>
+                    </button>
+                </div>
+                <div ng-show="checkTelIsShow" class="login-area col s12">
+                    <em>已有账号？去</em>
+                    <a ng-click="showLogin()">登录</a>
+                </div>
+                <div ng-show="captchaIsShow" class="input-field col s12">
+                    <input type="text" ng-model="signupInfo.captcha" required="required" class="validate"/>
+                    <label>验证码</label>
+                </div>
+                <div ng-show="captchaIsShow" class="input-field col s12">
+                    <input type="password" ng-model="signupInfo.password" required="required" class="validate"/>
+                    <label>密码</label>
+                </div>
+                <div ng-show="captchaIsShow" class="input-field col s12">
+                    <input type="password" ng-model="signupInfo.password2" required="required" class="validate"/>
+                    <label>确认密码</label>
+                </div>
+                <div ng-show="captchaIsShow" class="input-field col s12">
+                    <input type="text" ng-model="signupInfo.name" required="required" class="validate"/>
+                    <label>昵称</label>
+                </div>
+                <button ng-show="signupBtnIsShow" ng-click="signup()" class="waves-effect waves-light btn signup-btn red lighten-1">
+                    <i class="iconfont left">&#xe60b;</i>
+                    <em>注册</em>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div ng-controller="verifyMailController">
+    <div id="change-show" ng-show="verifyMailIsShow" ng-click="changeVerifyMailShow($event)" class="verify-mail stark-components">
+        <div class="publish-box z-depth-4">
+            <div class="row">
+                <div ng-show="loaderIsShow" class="col s12 loader">
+                    <div class="preloader-wrapper big active">
+                        <div class="spinner-layer spinner-red-only">
+                            <div class="circle-clipper left">
+                                <div class="circle"></div>
+                            </div>
+                            <div class="gap-patch">
+                                <div class="circle"></div>
+                            </div>
+                            <div class="circle-clipper right">
+                                <div class="circle"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col s12 title">
+                    <h1>验证邮箱</h1>
+                </div>
+                <div class="input-field col s12">
+                    <input type="text" ng-model="mailAddress" required="required" class="validate"/>
+                    <label>复旦学邮</label>
+                    <em>@fudan.edu.cn</em>
+                </div>
+                <div class="col s12">
+                    <button ng-click="requestVerifyMail()" class="waves-effect waves-light btn publish-btn red lighten-1">
+                        <i class="iconfont left">&#xe60a;</i>
+                        <em>发送验证邮件</em>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div ng-controller="forgetController">
+    <div id="change-show" ng-show="forgetIsShow" ng-click="changeForgetShow($event)" class="forget stark-components">
+        <div class="publish-box z-depth-4">
+            <div class="row">
+                <div class="col s12 title">
+                    <h1>重置密码</h1>
+                </div>
+                <div class="input-field col s12">
+                    <input type="text" ng-model="tel" required="required" pattern="^1[0-9]{10}$" class="validate"/>
+                    <label>账号绑定的手机</label>
+                </div>
+                <div ng-show="checkTelIsShow" class="col s12">
+                    <button ng-click="checkTel()" class="waves-effect waves-light btn publish-btn red lighten-1">
+                        <i class="iconfont left">&#xe60d;</i>
+                        <em>验证手机</em>
+                    </button>
+                </div>
+                <div ng-show="captchaIsShow" class="input-field col s12">
+                    <input type="text" ng-model="captcha" required="required" class="validate"/>
+                    <label>验证码</label>
+                </div>
+                <div ng-show="captchaIsShow" class="input-field col s12">
+                    <input type="password" ng-model="newPassword" required="required" class="validate"/>
+                    <label>新密码</label>
+                </div>
+                <button ng-show="captchaIsShow" ng-click="resetPassword()" class="waves-effect waves-light btn publish-btn red lighten-1">
+                    <i class="iconfont left">&#xe60b;</i>
+                    <em>重置密码</em>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div ng-controller="changeNameController">
+    <div id="change-show" ng-show="changeNameIsShow" ng-click="changeChangeNameShow($event)" class="change-name stark-components">
+        <div class="publish-box z-depth-4">
+            <div class="row">
+                <div class="col s12 title">
+                    <h1>修改用户名</h1>
+                </div>
+                <div class="input-field col s12">
+                    <input type="text" ng-model="name" required="required" class="validate"/>
+                    <label>新用户名</label>
+                </div>
+                <button ng-click="setName()" class="waves-effect waves-light btn publish-btn red lighten-1">
+                    <i class="iconfont left">&#xe60b;</i>
+                    <em>确认</em>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<back-top scroll-speed="1000" class="stark-components"></back-top>
+<div ng-controller="sidebarController" class="sidebar stark-components">
+    <li ng-class="{true: 'active'}[isAll]">
+        <a href="/category/all" class="index">
+            <img src="img/index.png"/>
+            <em>最新发布</em>
+        </a>
+    </li>
+    <li ng-class="{true: 'active'}[isDigital]">
+        <a href="/category/digital" class="digital">
+            <img src="img/digital.png"/>
+            <em>闲置数码</em>
+            <span ng-show="amount['闲置数码']&gt;0" class="new-item grey lighten-1">+{{amount['闲置数码']}}</span>
+        </a>
+    </li>
+    <li ng-class="{true: 'active'}[isRide]">
+        <a href="/category/ride" class="ride">
+            <img src="img/ride.png"/>
+            <em>校园代步</em>
+            <span ng-show="amount['校园代步']&gt;0" class="new-item grey lighten-1">+{{amount['校园代步']}}</span>
+        </a>
+    </li>
+    <li ng-class="{true: 'active'}[isCommodity]">
+        <a href="/category/commodity" class="commodity">
+            <img src="img/commodity.png"/>
+            <em>电器日用</em>
+            <span ng-show="amount['电器日用']&gt;0" class="new-item grey lighten-1">+{{amount['电器日用']}}</span>
+        </a>
+    </li>
+    <li ng-class="{true: 'active'}[isBook]">
+        <a href="/category/book" class="book">
+            <img src="img/book.png"/>
+            <em>图书教材</em>
+            <span ng-show="amount['图书教材']&gt;0" class="new-item grey lighten-1">+{{amount['图书教材']}}</span>
+        </a>
+    </li>
+    <li ng-class="{true: 'active'}[isMakeup]">
+        <a href="/category/makeup" class="makeup">
+            <img src="img/makeup.png"/>
+            <em>美妆衣物</em>
+            <span ng-show="amount['美妆衣物']&gt;0" class="new-item grey lighten-1">+{{amount['美妆衣物']}}</span>
+        </a>
+    </li>
+    <li ng-class="{true: 'active'}[isSport]">
+        <a href="/category/sport" class="sport">
+            <img src="img/sport.png"/>
+            <em>运动棋牌</em>
+            <span ng-show="amount['运动棋牌']&gt;0" class="new-item grey lighten-1">+{{amount['运动棋牌']}}</span>
+        </a>
+    </li>
+    <li ng-class="{true: 'active'}[isSmallthing]">
+        <a href="/category/smallthing" class="smallthing">
+            <img src="img/smallthing.png"/>
+            <em>票券小物</em>
+            <span ng-show="amount['票券小物']&gt;0" class="new-item grey lighten-1">+{{amount['票券小物']}}</span>
+        </a>
+    </li>
+    <div class="info">
+        <a href="http://chenxi.fudan.edu.cn/" target="_blank">关于我们</a>
+        <em>-</em>
+        <a href="mailto:fdu_chenxi@163.com">联系我们</a>
+        <p>©2015 航行工作室</p>
+    </div>
+</div>
+<div class="main-content">
+    <div class="slider-wapper">
+        <div class="slider">
+            <ul class="slides">
+                <li>
+                    <img src="img/small/file-1472568668146.jpg"/>
+                    <div class="caption center-align">
+                        <a href="item/1472568668169">
+                            <h3>一招教你快速挂横幅</h3>
+                            <!-- h5.light.grey-text.text-lighten-3 ￥#{data.bannerItem[i].price}-->
+                            <!-- h4 立即查看 >-->
+                        </a>
+                    </div>
+                </li>
+                <li>
+                    <img src="img/small/file-1472051619286.jpg"/>
+                    <div class="caption right-align">
+                        <a href="item/1472051619631">
+                            <h3>开学季，一大波优惠自行车来袭</h3>
+                            <!-- h5.light.grey-text.text-lighten-3 ￥#{data.bannerItem[i].price}-->
+                            <!-- h4 立即查看 >-->
+                        </a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="index-title">
+        <a href="/category/all">最新发布</a>
+        <hr class="hr1"/>
+        <hr class="hr2"/>
+    </div>
+    <div class="waterfoo stark-components row">
+        <div class="item-wrapper normal">
+            <div class="card col">
+                <a href="item/1478264513475">
+                    <div style="background-image:url(img/small/file-1478264513378.jpg)" class="card-image"></div>
+                    <div class="card-content item-price">￥70</div>
+                    <div class="card-content item-name">
+                        <p>乐心手环 Mambo-1（全新未拆封）</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>江湾校区</p>
+                        <p>6 天前         </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="item/1478079026319">
+                    <div style="background-image:url(img/small/file-1478079024672.JPG)" class="card-image"></div>
+                    <div class="card-content item-price">￥195</div>
+                    <div class="card-content item-name">
+                        <p>自行车</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>张江校区</p>
+                        <p>8 天前         </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1477921566214">
+                    <div style="background-image:url(img/small/file-1477921565854.JPG)" class="card-image"></div>
+                    <div class="card-content item-price">￥40</div>
+                    <div class="card-content item-name">
+                        <p>托福OG最新版</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>邯郸校区</p>
+                        <p>10 天前         </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1477919836855">
+                    <div style="background-image:url(img/small/file-1477919836788.jpg)" class="card-image"></div>
+                    <div class="card-content item-price">￥40</div>
+                    <div class="card-content item-name">
+                        <p>全新李宁羽毛球拍</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>邯郸校区</p>
+                        <p>10 天前         </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1477797737451">
+                    <div style="background-image:url(img/small/file-1477797734091.jpg)" class="card-image"></div>
+                    <div class="card-content item-price">￥178</div>
+                    <div class="card-content item-name">
+                        <p>倩碧黄油无油款125mL全新未开封</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>邯郸校区</p>
+                        <p>11 天前         </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1477582138162">
+                    <div style="background-image:url(img/small/file-1477582138129.png)" class="card-image"></div>
+                    <div class="card-content item-price">￥5299</div>
+                    <div class="card-content item-name">
+                        <p>MacBook Pro, Retina, Late 2013, 8GB内存, 512GB固态硬盘, 2.6 GHz Intel Core i5</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>全校</p>
+                        <p>14 天前         </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1477565457961">
+                    <div style="background-image:url(img/small/file-1477565457939.jpg)" class="card-image"></div>
+                    <div class="card-content item-price">￥900</div>
+                    <div class="card-content item-name">
+                        <p>捷安特山地自行车</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>枫林校区</p>
+                        <p>14 天前         </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1477224923787">
+                    <div style="background-image:url(img/small/file-1477224923772.jpg)" class="card-image"></div>
+                    <div class="card-content item-price">￥0</div>
+                    <div class="card-content item-name">
+                        <p>出售----时间</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>邯郸校区</p>
+                        <p>18 天前         </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1477223650967">
+                    <div style="background-image:url(img/small/file-1477223650943.jpg)" class="card-image"></div>
+                    <div class="card-content item-price">￥200</div>
+                    <div class="card-content item-name">
+                        <p>拍立得</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>邯郸校区</p>
+                        <p>18 天前         </p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="index-title">
+        <a href="/category/digital">闲置数码</a>
+        <hr class="hr1"/>
+        <hr class="hr2"/>
+    </div>
+    <div class="waterfoo stark-components row">
+        <div class="item-wrapper normal">
+            <div class="card col">
+                <a href="/item/1478264513475">
+                    <div style="background-image:url(img/small/file-1478264513378.jpg)" class="card-image"></div>
+                    <div class="card-content item-price">￥70</div>
+                    <div class="card-content item-name">
+                        <p>乐心手环 Mambo-1（全新未拆封）</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>江湾校区</p>
+                        <p>6 天前           </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1477582138162">
+                    <div style="background-image:url(img/small/file-1477582138129.png)" class="card-image"></div>
+                    <div class="card-content item-price">￥5299</div>
+                    <div class="card-content item-name">
+                        <p>MacBook Pro, Retina, Late 2013, 8GB内存, 512GB固态硬盘, 2.6 GHz Intel Core i5</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>全校</p>
+                        <p>14 天前           </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1477223650967">
+                    <div style="background-image:url(img/small/file-1477223650943.jpg)" class="card-image"></div>
+                    <div class="card-content item-price">￥200</div>
+                    <div class="card-content item-name">
+                        <p>拍立得</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>邯郸校区</p>
+                        <p>18 天前           </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1476689803458">
+                    <div style="background-image:url(img/small/file-1476689795057.jpg)" class="card-image"></div>
+                    <div class="card-content item-price">￥50</div>
+                    <div class="card-content item-name">
+                        <p>暴风魔镜小D VR眼镜</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>枫林校区</p>
+                        <p>24 天前           </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1476626027883">
+                    <div style="background-image:url(img/small/file-1476626027784.jpg)" class="card-image"></div>
+                    <div class="card-content item-price">￥2600</div>
+                    <div class="card-content item-name">
+                        <p>手机IPHONE6 PLUS</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>全校</p>
+                        <p>25 天前           </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1476180510473">
+                    <div style="background-image:url(img/small/file-1476180509991.JPG)" class="card-image"></div>
+                    <div class="card-content item-price">￥3</div>
+                    <div class="card-content item-name">
+                        <p>玛姬儿压缩面膜纸</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>全校</p>
+                        <p>1 个月前           </p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="index-title">
+        <a href="/category/ride">校园代步</a>
+        <hr class="hr1"/>
+        <hr class="hr2"/>
+    </div>
+    <div class="waterfoo stark-components row">
+        <div class="item-wrapper normal">
+            <div class="card col">
+                <a href="/item/1478079026319">
+                    <div style="background-image:url(img/small/file-1478079024672.JPG)" class="card-image"></div>
+                    <div class="card-content item-price">￥195</div>
+                    <div class="card-content item-name">
+                        <p>自行车</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>张江校区</p>
+                        <p>8 天前           </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1477565457961">
+                    <div style="background-image:url(img/small/file-1477565457939.jpg)" class="card-image"></div>
+                    <div class="card-content item-price">￥900</div>
+                    <div class="card-content item-name">
+                        <p>捷安特山地自行车</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>枫林校区</p>
+                        <p>14 天前           </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1475932630684">
+                    <div style="background-image:url(img/small/file-1475932630613.jpg)" class="card-image"></div>
+                    <div class="card-content item-price">￥1024</div>
+                    <div class="card-content item-name">
+                        <p>坦克，能在长安街上跑的那种</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>全校</p>
+                        <p>1 个月前           </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1475830469883">
+                    <div style="background-image:url(img/small/file-1475830469409.jpg)" class="card-image"></div>
+                    <div class="card-content item-price">￥230</div>
+                    <div class="card-content item-name">
+                        <p>自行车</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>张江校区</p>
+                        <p>1 个月前           </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1472051619631">
+                    <div style="background-image:url(img/small/file-1472051619286.jpg)" class="card-image"></div>
+                    <div class="card-content item-price">￥180</div>
+                    <div class="card-content item-name">
+                        <p>开学季，一大波优惠自行车来袭</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>邯郸校区</p>
+                        <p>3 个月前           </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1471878933862">
+                    <div style="background-image:url(img/small/file-1471878933779.jpg)" class="card-image"></div>
+                    <div class="card-content item-price">￥180</div>
+                    <div class="card-content item-name">
+                        <p>超高性价比全新自行车</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>邯郸校区</p>
+                        <p>3 个月前           </p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="index-title">
+        <a href="/category/commodity">电器日用</a>
+        <hr class="hr1"/>
+        <hr class="hr2"/>
+    </div>
+    <div class="waterfoo stark-components row">
+        <div class="item-wrapper normal">
+            <div class="card col">
+                <a href="/item/1477124693100">
+                    <div style="background-image:url(img/small/file-1477124691615.JPG)" class="card-image"></div>
+                    <div class="card-content item-price">￥36</div>
+                    <div class="card-content item-name">
+                        <p>山西运城精品红富士</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>全校</p>
+                        <p>19 天前           </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1476182319208">
+                    <div style="background-image:url(img/small/file-1476182319039.JPG)" class="card-image"></div>
+                    <div class="card-content item-price">￥25</div>
+                    <div class="card-content item-name">
+                        <p>宜家餐具</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>全校</p>
+                        <p>1 个月前           </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1476182272900">
+                    <div style="background-image:url(img/small/file-1476182272548.JPG)" class="card-image"></div>
+                    <div class="card-content item-price">￥3</div>
+                    <div class="card-content item-name">
+                        <p>一次性纸杯</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>全校</p>
+                        <p>1 个月前           </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1476182216887">
+                    <div style="background-image:url(img/small/file-1476182216842.JPG)" class="card-image"></div>
+                    <div class="card-content item-price">￥10</div>
+                    <div class="card-content item-name">
+                        <p>防潮垫</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>全校</p>
+                        <p>1 个月前           </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1476181400214">
+                    <div style="background-image:url(img/small/file-1476181399752.JPG)" class="card-image"></div>
+                    <div class="card-content item-price">￥30</div>
+                    <div class="card-content item-name">
+                        <p>折叠桌</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>全校</p>
+                        <p>1 个月前           </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1476181230011">
+                    <div style="background-image:url(img/small/file-1476181229772.JPG)" class="card-image"></div>
+                    <div class="card-content item-price">￥5</div>
+                    <div class="card-content item-name">
+                        <p>衣裤架</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>全校</p>
+                        <p>1 个月前           </p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="index-title">
+        <a href="/category/book">图书教材</a>
+        <hr class="hr1"/>
+        <hr class="hr2"/>
+    </div>
+    <div class="waterfoo stark-components row">
+        <div class="item-wrapper normal">
+            <div class="card col">
+                <a href="/item/1477921566214">
+                    <div style="background-image:url(img/small/file-1477921565854.JPG)" class="card-image"></div>
+                    <div class="card-content item-price">￥40</div>
+                    <div class="card-content item-name">
+                        <p>托福OG最新版</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>邯郸校区</p>
+                        <p>10 天前           </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1475837206562">
+                    <div style="background-image:url(img/small/file-1475837204337.jpg)" class="card-image"></div>
+                    <div class="card-content item-price">￥25</div>
+                    <div class="card-content item-name">
+                        <p>AND THEN THERE WERE NONE</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>全校</p>
+                        <p>1 个月前           </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1475837037196">
+                    <div style="background-image:url(img/small/file-1475837025705.jpg)" class="card-image"></div>
+                    <div class="card-content item-price">￥30</div>
+                    <div class="card-content item-name">
+                        <p>ONE DAY</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>全校</p>
+                        <p>1 个月前           </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1475652563549">
+                    <div style="background-image:url(img/small/file-1475652563530.jpg)" class="card-image"></div>
+                    <div class="card-content item-price">￥40</div>
+                    <div class="card-content item-name">
+                        <p>GRE考试官方指南OG第二版</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>邯郸校区</p>
+                        <p>1 个月前           </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1475652410902">
+                    <div style="background-image:url(img/small/file-1475652410879.jpg)" class="card-image"></div>
+                    <div class="card-content item-price">￥20</div>
+                    <div class="card-content item-name">
+                        <p>国际财务管理</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>邯郸校区</p>
+                        <p>1 个月前           </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1475652247432">
+                    <div style="background-image:url(img/small/file-1475652247415.jpg)" class="card-image"></div>
+                    <div class="card-content item-price">￥15</div>
+                    <div class="card-content item-name">
+                        <p>国际贸易</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>邯郸校区</p>
+                        <p>1 个月前           </p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="index-title">
+        <a href="/category/makeup">美妆衣物</a>
+        <hr class="hr1"/>
+        <hr class="hr2"/>
+    </div>
+    <div class="waterfoo stark-components row">
+        <div class="item-wrapper normal">
+            <div class="card col">
+                <a href="/item/1477797737451">
+                    <div style="background-image:url(img/small/file-1477797734091.jpg)" class="card-image"></div>
+                    <div class="card-content item-price">￥178</div>
+                    <div class="card-content item-name">
+                        <p>倩碧黄油无油款125mL全新未开封</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>邯郸校区</p>
+                        <p>11 天前           </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1476940439366">
+                    <div style="background-image:url(img/small/file-1476940438670.png)" class="card-image"></div>
+                    <div class="card-content item-price">￥110</div>
+                    <div class="card-content item-name">
+                        <p>日本Rêveur 無硅洗髮水＋護髮素（綠色）</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>邯郸校区</p>
+                        <p>21 天前           </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1476674472634">
+                    <div style="background-image:url(img/small/file-1476674472542.JPG)" class="card-image"></div>
+                    <div class="card-content item-price">￥10</div>
+                    <div class="card-content item-name">
+                        <p>红色sparkle翻沿帽</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>全校</p>
+                        <p>24 天前           </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1476674429129">
+                    <div style="background-image:url(img/small/file-1476674429076.JPG)" class="card-image"></div>
+                    <div class="card-content item-price">￥15</div>
+                    <div class="card-content item-name">
+                        <p>纯黑皮质爵士帽</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>全校</p>
+                        <p>24 天前           </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1476674381130">
+                    <div style="background-image:url(img/small/file-1476674380668.JPG)" class="card-image"></div>
+                    <div class="card-content item-price">￥10</div>
+                    <div class="card-content item-name">
+                        <p>红白格子爵士帽</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>全校</p>
+                        <p>24 天前           </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1476674316778">
+                    <div style="background-image:url(img/small/file-1476674316663.JPG)" class="card-image"></div>
+                    <div class="card-content item-price">￥20</div>
+                    <div class="card-content item-name">
+                        <p>皮质棕色八角帽</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>全校</p>
+                        <p>24 天前           </p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="index-title">
+        <a href="/category/sport">运动棋牌</a>
+        <hr class="hr1"/>
+        <hr class="hr2"/>
+    </div>
+    <div class="waterfoo stark-components row">
+        <div class="item-wrapper normal">
+            <div class="card col">
+                <a href="/item/1477919836855">
+                    <div style="background-image:url(img/small/file-1477919836788.jpg)" class="card-image"></div>
+                    <div class="card-content item-price">￥40</div>
+                    <div class="card-content item-name">
+                        <p>全新李宁羽毛球拍</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>邯郸校区</p>
+                        <p>10 天前           </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1476885269911">
+                    <div style="background-image:url(img/small/file-1476885269883.jpg)" class="card-image"></div>
+                    <div class="card-content item-price">￥1800</div>
+                    <div class="card-content item-name">
+                        <p>长江南路地铁站附近H3健身卡</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>江湾校区</p>
+                        <p>22 天前           </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1476180296659">
+                    <div style="background-image:url(img/small/file-1476180296228.JPG)" class="card-image"></div>
+                    <div class="card-content item-price">￥10</div>
+                    <div class="card-content item-name">
+                        <p>迪士尼扑克牌两套</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>全校</p>
+                        <p>1 个月前           </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1474102700698">
+                    <div style="background-image:url(img/small/file-1474102700317.jpg)" class="card-image"></div>
+                    <div class="card-content item-price">￥80</div>
+                    <div class="card-content item-name">
+                        <p>网球拍</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>邯郸校区</p>
+                        <p>2 个月前           </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1472882337768">
+                    <div style="background-image:url(img/small/file-1472882337005.jpg)" class="card-image"></div>
+                    <div class="card-content item-price">￥23.33</div>
+                    <div class="card-content item-name">
+                        <p>折叠式防潮垫（Therm-a-Rest Z-Rest Sleeping Pad）</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>全校</p>
+                        <p>2 个月前           </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1472880745229">
+                    <div style="background-image:url(img/small/file-1472880744951.jpg)" class="card-image"></div>
+                    <div class="card-content item-price">￥23.33</div>
+                    <div class="card-content item-name">
+                        <p>登山杖</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>全校</p>
+                        <p>2 个月前           </p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="index-title">
+        <a href="/category/smallthing">票券小物</a>
+        <hr class="hr1"/>
+        <hr class="hr2"/>
+    </div>
+    <div class="waterfoo stark-components row">
+        <div class="item-wrapper normal">
+            <div class="card col">
+                <a href="/item/1477224923787">
+                    <div style="background-image:url(img/small/file-1477224923772.jpg)" class="card-image"></div>
+                    <div class="card-content item-price">￥0</div>
+                    <div class="card-content item-name">
+                        <p>出售----时间</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>邯郸校区</p>
+                        <p>18 天前           </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1474801258357">
+                    <div style="background-image:url(img/small/file-1474801256707.jpg)" class="card-image"></div>
+                    <div class="card-content item-price">￥1800</div>
+                    <div class="card-content item-name">
+                        <p>四季园健身卡</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>枫林校区</p>
+                        <p>2 个月前           </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1473591578807">
+                    <div style="background-image:url(img/small/file-1473591577525.jpeg)" class="card-image"></div>
+                    <div class="card-content item-price">￥1199</div>
+                    <div class="card-content item-name">
+                        <p>明翼舞蹈会所 20次卡 上海新江湾城店</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>江湾校区</p>
+                        <p>2 个月前           </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1472568668169">
+                    <div style="background-image:url(img/small/file-1472568668146.jpg)" class="card-image"></div>
+                    <div class="card-content item-price">￥0</div>
+                    <div class="card-content item-name">
+                        <p>一招教你快速挂横幅</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>邯郸校区</p>
+                        <p>2 个月前           </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1470761629153">
+                    <div style="background-image:url(img/small/file-1470761628579.jpg)" class="card-image"></div>
+                    <div class="card-content item-price">￥449</div>
+                    <div class="card-content item-name">
+                        <p>亚马逊充值卡/礼品卡500现在449</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>张江校区</p>
+                        <p>3 个月前           </p>
+                    </div>
+                </a>
+            </div>
+            <div class="card col">
+                <a href="/item/1466839362913">
+                    <div style="background-image:url(img/small/file-1466839362799.jpg)" class="card-image"></div>
+                    <div class="card-content item-price">￥130</div>
+                    <div class="card-content item-name">
+                        <p>美发卡</p>
+                    </div>
+                    <div class="card-content item-location">
+                        <p>邯郸校区</p>
+                        <p>5 个月前           </p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="http://s4.cnzz.com/z_stat.php?id=1259433787&amp;web_id=1259433787" language="JavaScript"></script>
+</body>
+</html>
